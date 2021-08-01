@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Contatos</string>
+    <string name="btn_save">Salvar</string>
+    <string name="btn_delete">Excluir</string>
+    <string name="title_edit_contact">Editar Contato</string>
+    <string name="title_add_contact">Criar Contato</string>
+    <string name="hint_search">Busca</string>
+    <string name="hint_name">Nome</string>
+    <string name="hint_phone">Telefone</string>
+</resources>

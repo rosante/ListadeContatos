@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_gray"
+    tools:context=".ContactActivity">
+
+    <TextView
+        android:id="@+id/textViewTitleContact"
+        android:text="Contato"
+        style="@style/title_layout"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="58dp" />
+
+    <EditText
+        android:id="@+id/editTextTextNameContact"
+        android:hint="@string/hint_name"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTitleContact"
+        tools:layout_editor_absoluteX="14dp"
+        android:inputType="textPersonName"
+        style="@style/textInput_layout" />
+
+    <EditText
+        android:id="@+id/editTextTextPhoneContact"
+        style="@style/textInput_layout"
+        android:hint="@string/hint_phone"
+        android:inputType="phone"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTextNameContact"
+        tools:layout_editor_absoluteX="16dp" />
+
+
+    <Button
+        android:id="@+id/buttonSave"
+        style="@style/button_layout"
+        android:text="@string/btn_save"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/buttonDelete"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTextPhoneContact" />
+
+    <Button
+        android:id="@+id/buttonDelete"
+        style="@style/button_layout"
+        android:text="@string/btn_delete"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSave"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTextPhoneContact" />
+
+    <TextView
+        android:id="@+id/textViewId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Id"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="208dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
