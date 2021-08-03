@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
@@ -29,17 +30,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         helperDB = HelperDB(this)
-
-        try{
-            configureRecycleView()
-        }catch(ex: Exception){
-            Log.e("SQLITE", ex.toString())
-        }
+        configureRecycleView()
 
         editTextSearch.doAfterTextChanged {
             val contactList = ContactSingleton.contactList
             val filtered = contactList.filter{it.nome.lowercase().contains(editTextSearch.text.toString().lowercase())}
-            updateRecyclerView(filtered)
+            showInRecyclerView(filtered)
         }
         buttonAdd.setOnClickListener(){
             val intent = Intent(this, ContactActivity::class.java)
@@ -51,34 +47,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        ContactSingleton.contactList = helperDB?.getAllContacts() ?: mutableListOf()
-        updateRecyclerView(ContactSingleton.contactList)
+        progressBarMain.visibility = View.VISIBLE
+        updateRecyclerView()
     }
-
-    private fun updateRecyclerView(list:List<Contact>){
-        if (list.isNullOrEmpty() && editTextSearch.text.isNullOrBlank()){
+    private fun showInRecyclerView(list:List<Contact>){
+        contactAdapter = ContactAdapter(list){onClickItemRecycleView(it)}
+        recyclerViewContacts.adapter = contactAdapter
+    }
+    private fun updateRecyclerView(){
+        progressBarMain.visibility = View.VISIBLE
+        Thread(Runnable {
             try{
                 ContactSingleton.contactList = helperDB?.getAllContacts() ?: mutableListOf()
                 contactAdapter = ContactAdapter(ContactSingleton.contactList){onClickItemRecycleView(it)}
             }catch(ex: Exception){
-                Log.e("E/SQLITE", ex.toString())
+                Log.e("MainActivity/updateRecy", ex.toString())
             }
-        }else{
-            contactAdapter = ContactAdapter(list){onClickItemRecycleView(it)}
-        }
-        val recyclerView:RecyclerView = findViewById(R.id.recyclerViewContacts)
-        recyclerView.adapter = contactAdapter
-        contactAdapter.notifyDataSetChanged()
+            runOnUiThread {
+                recyclerViewContacts.adapter = contactAdapter
+                progressBarMain.visibility = View.INVISIBLE
+            }
+        }).start()
     }
     private fun configureRecycleView(){
-        ContactSingleton.contactList = helperDB?.getAllContacts() ?: mutableListOf()
-        val recyclerView:RecyclerView = findViewById(R.id.recyclerViewContacts)
         contactAdapter = ContactAdapter(ContactSingleton.contactList){onClickItemRecycleView(it)}
-        val layoutManager = LinearLayoutManager(applicationContext)
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = contactAdapter
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-        contactAdapter.notifyDataSetChanged()
+        recyclerViewContacts.layoutManager = LinearLayoutManager(applicationContext)
+        recyclerViewContacts.adapter = contactAdapter
+        recyclerViewContacts.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
     }
     private fun onClickItemRecycleView(index:Int){
         val intent = Intent(this, ContactActivity::class.java)

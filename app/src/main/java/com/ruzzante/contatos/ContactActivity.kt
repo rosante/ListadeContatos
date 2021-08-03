@@ -11,6 +11,7 @@ import com.ruzzante.contatos.helpers.HelperDB
 import com.ruzzante.contatos.models.Contact
 import com.ruzzante.contatos.singleton.ContactSingleton
 import kotlinx.android.synthetic.main.activity_contact.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.recyclerview_row.*
 import java.lang.Exception
 import java.lang.Integer.parseInt
@@ -28,10 +29,36 @@ class ContactActivity : AppCompatActivity() {
         helperDB = HelperDB(this)
 
         buttonDelete.setOnClickListener {
-            deleteContact()
+            progressBarContact.visibility = View.VISIBLE
+            Thread(Runnable {
+                val result = deleteContact()
+                runOnUiThread{
+                    if (result)
+                        Toast.makeText(this, "Contato removido", Toast.LENGTH_SHORT).show()
+                    else
+                        Toast.makeText(this, "Erro, contato não removido", Toast.LENGTH_SHORT).show()
+                    progressBarContact.visibility = View.INVISIBLE
+                    this.onBackPressed()
+                }
+            }).start()
         }
         buttonSave.setOnClickListener {
-            saveContact()
+            progressBarContact.visibility = View.VISIBLE
+            index = intent.getIntExtra("index", -1)
+            val contact = Contact(nome=editTextTextNameContact.text.toString(), telefone=editTextTextPhoneContact.text.toString(), id=index)
+            Thread(Runnable {
+                val result = saveContact(contact)
+                val message:String
+                if (result)
+                    message = "Contato Adicionado"
+                else
+                    message = "Erro. Contato não adicionado"
+                runOnUiThread{
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                    progressBarContact.visibility = View.INVISIBLE
+                    this.onBackPressed()
+                }
+            }).start()
         }
 
     }
@@ -51,36 +78,32 @@ class ContactActivity : AppCompatActivity() {
             textViewId.text = index.toString()
             editTextTextNameContact.setText(contact.nome)
             editTextTextPhoneContact.setText(contact.telefone)
-            textViewId.setText(index)
-
-            Log.w("W/ContactActivity", "Contact found: ${contact.id.toString()} - ${contact.nome.toString()} - ${contact.telefone.toString()}")
         }catch(ex: Exception){
             Log.e("E/LAYOUT", ex.toString())
         }
 
     }
-    private fun deleteContact(){
+    private fun deleteContact():Boolean{
         try{
             index = intent.getIntExtra("index", -1)
-            if (helperDB?.deleteContact(index) == true)
-                Toast.makeText(this, "Contato removido", Toast.LENGTH_SHORT).show()
-            else
-                Toast.makeText(this, "Erro ao remover contato", Toast.LENGTH_SHORT).show()
-            this.onBackPressed()
+            helperDB?.deleteContact(index)
+            return true
         }catch(ex: Exception){
-            Log.e("E/CONTATO", ex.toString())
+            Log.e("ContactActivity/deleteC", ex.toString())
         }
+        return false
     }
-    private fun saveContact(){
+    private fun saveContact(contact:Contact):Boolean{
         try{
-            if (textViewTitleContact.text.toString() == "Editar Contato")
-                helperDB?.updateContact(Contact(nome=editTextTextNameContact.text.toString(), telefone=editTextTextPhoneContact.text.toString(), id=parseInt(textViewId.text.toString())))
+            if (contact.id == -1)
+                helperDB?.addContact(contact)
             else
-                helperDB?.addContact(Contact(nome=editTextTextNameContact.text.toString(), telefone=editTextTextPhoneContact.text.toString()))
-            this.onBackPressed()
+                helperDB?.updateContact(contact)
+            return true
         }catch(ex: Exception){
-            Log.e("E/CONTATO", ex.toString())
+            Log.e("ContactActivity/saveCon", ex.toString())
         }
+        return false
     }
 
 }
